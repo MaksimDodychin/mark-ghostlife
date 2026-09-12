@@ -131,6 +131,8 @@
   #achToast.show { opacity:1; }
   #err { position:fixed; left:8px; right:8px; top:8px; z-index:99; color:#ff9b9b; font:700 13px/1.4 monospace;
     background:#200; padding:8px; border-radius:8px; display:none; white-space:pre-wrap; }
+  /* Астра: менее сильное зерно сохраняет читаемость материалов в ночи. */
+  #grain { opacity:.035; }
 </style>
 
   <link rel="manifest" href="manifest.webmanifest">
@@ -144,7 +146,7 @@
   <link rel="apple-touch-icon-precomposed" sizes="180x180" href="apple-touch-icon.png">
   <meta name="msapplication-TileImage" content="icon-192.png">
   <meta name="msapplication-TileColor" content="#7c3aed">
-  <script>window.__APP_VER = "5f3cc764f6";</script>
+  <script>window.__APP_VER = "33bd4556bc";</script>
 </head>
 <body>
 <div id="err"></div>
@@ -382,6 +384,77 @@ const texКовёр = холст(128, (g, S) => {
    🏠 ДОМ. Один и тот же для обоих режимов: в первом ты в нём
    живёшь и боишься, во втором — ты в нём и есть то, чего боятся.
    ═══════════════════════════════════════════════════════════ */
+/* Астра: материалы и детали; без новых источников света и игровых препятствий. */
+const glArt={maps:new Map(),mats:new Map(),geo:new Map(),details:0};
+function glVisual(fn){const old=Math.random;let s=0x7138f21;Math.random=()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296);try{return fn();}finally{Math.random=old;}}
+function glTex(kind){if(glArt.maps.has(kind))return glArt.maps.get(kind);const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle='#e2ded7';g.fillRect(0,0,512,512);
+  const noise=(n,a)=>{for(let i=0;i<n;i++){g.fillStyle=i%2?`rgba(10,14,20,${a})`:`rgba(255,255,255,${a})`;g.fillRect(Math.random()*512,Math.random()*512,.5+Math.random()*1.5,.5+Math.random()*1.5);}};
+  if(kind==='wood'||kind==='parquet'){
+    g.fillStyle=kind==='parquet'?'#be9064':'#e0cdb2';g.fillRect(0,0,512,512);
+    for(let row=0;row<8;row++){const y=row*64;for(let col=-1;col<5;col++){const x=col*128+(row%2)*64;g.fillStyle=`rgba(${row%2?45:255},${row%2?20:229},${row%2?8:189},${.035+Math.random()*.075})`;g.fillRect(x+1,y+1,126,62);if(kind==='parquet'){g.strokeStyle='#51372155';g.lineWidth=2;g.strokeRect(x,y,128,64);}
+      for(let k=0;k<26;k++){const yy=y+2+Math.random()*60;g.strokeStyle=k%3?'rgba(44,21,9,.14)':'rgba(255,246,214,.18)';g.lineWidth=.6+Math.random();g.beginPath();for(let t=0;t<=128;t+=8)g.lineTo(x+t,yy+Math.sin(t*.065+k)*1.1);g.stroke();}}}
+    noise(5000,.10);
+  }else if(kind==='cloth'||kind==='wall'){
+    noise(18000,.05);for(let n=0;n<512;n+=4){g.fillStyle='rgba(80,69,64,.07)';g.fillRect(n,0,1,512);g.fillStyle='rgba(255,255,255,.10)';g.fillRect(0,n,512,1);}
+    if(kind==='wall')for(let y=-50;y<570;y+=94)for(let x=-40;x<560;x+=72){g.strokeStyle='rgba(64,57,47,.08)';g.lineWidth=1.8;g.beginPath();g.moveTo(x,y-22);g.bezierCurveTo(x+22,y-7,x+20,y+4,x,y+23);g.bezierCurveTo(x-20,y+4,x-22,y-7,x,y-22);g.stroke();}
+  }else if(kind==='tile'){
+    g.fillStyle='#dce0df';g.fillRect(0,0,512,512);for(let y=0;y<512;y+=128)for(let x=0;x<512;x+=128){g.fillStyle=(x+y)%256?'#c1cbd0':'#dde0db';g.fillRect(x+3,y+3,122,122);g.strokeStyle='#f2f5ef';g.lineWidth=2;g.strokeRect(x+5,y+5,118,118);g.fillStyle='#6d788155';g.fillRect(x, y, 3,128);g.fillRect(x,y,128,3);}noise(2000,.035);
+  }else if(kind==='rug'){
+    g.fillStyle='#e1d4bd';g.fillRect(0,0,512,512);for(let k=0;k<4;k++){g.strokeStyle=k%2?'#695144':'#c3a67e';g.lineWidth=k%2?3:7;g.strokeRect(12+k*10,12+k*10,488-k*20,488-k*20);}for(let y=90;y<430;y+=62)for(let x=84;x<430;x+=62){g.strokeStyle='#896e5944';g.lineWidth=3;g.beginPath();g.moveTo(x,y-15);g.lineTo(x+15,y);g.lineTo(x,y+15);g.lineTo(x-15,y);g.closePath();g.stroke();}noise(18000,.13);
+  }else if(kind==='quilt'){
+    g.fillStyle='#d7e0e3';g.fillRect(0,0,512,512);for(let n=-512;n<1024;n+=64){g.strokeStyle='#405a6e25';g.lineWidth=3;g.beginPath();g.moveTo(n,0);g.lineTo(n+512,512);g.moveTo(n,512);g.lineTo(n+512,0);g.stroke();g.strokeStyle='#ffffff35';g.lineWidth=1;g.stroke();}noise(16000,.07);
+  }else if(kind==='stone'){
+    g.fillStyle='#d3d4d1';g.fillRect(0,0,512,512);noise(20000,.13);for(let i=0;i<24;i++){let x=Math.random()*512,y=Math.random()*512;g.strokeStyle='rgba(75,79,76,.08)';g.lineWidth=.5;g.beginPath();g.moveTo(x,y);for(let k=0;k<10;k++){x+=Math.random()*20;y+=Math.random()*12-5;g.lineTo(x,y);}g.stroke();}
+  }
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());glArt.maps.set(kind,t);return t;
+}
+function glMat(color,kind='cloth',roughness=.8,metalness=0){const key=[color,kind,roughness,metalness].join('|');if(glArt.mats.has(key))return glArt.mats.get(key);const m=new THREE.MeshStandardMaterial({color,roughness,metalness,map:glTex(kind),bumpMap:glTex(kind),bumpScale:kind==='cloth'?.0025:.013});glArt.mats.set(key,m);return m;}
+function glBoxGeo(w,h,d){const key=[w,h,d].join('|');if(!glArt.geo.has(key))glArt.geo.set(key,new THREE.BoxGeometry(w,h,d));return glArt.geo.get(key);}
+function glDetail(g,geo,mat,x,y,z,rotation){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);if(rotation)m.rotation.set(...rotation);m.raycast=()=>{};m.userData.glDetail=true;m.receiveShadow=true;m.castShadow=false;g.add(m);glArt.details++;return m;}
+function glBox(g,w,h,d,m,x,y,z){return glDetail(g,glBoxGeo(w,h,d),m,x,y,z);}
+function glSeam(g,points,r,m,closed=false){return glDetail(g,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(v=>new THREE.Vector3(...v)),closed),24,r,5,closed),m,0,0,0);}
+function glFrame(g,x,y,z,w,h,m){glBox(g,w,.022,.026,m,x,y-h/2,z);glBox(g,w,.022,.026,m,x,y+h/2,z);glBox(g,.022,h,.026,m,x-w/2,y,z);glBox(g,.022,h,.026,m,x+w/2,y,z);}
+function glChild(g,opts){
+  const cloth=glTex('cloth');g.traverse(o=>{if(o.isMesh&&o.geometry.type==='ExtrudeGeometry'&&o.material.isMeshStandardMaterial){o.material.map=cloth;o.material.bumpMap=cloth;o.material.bumpScale=.002;o.material.needsUpdate=true;}});
+  const seam=glMat(0xd9d9de,'cloth'),dark=glMat(0x273347,'cloth');
+  glBox(g,.013,.36,.009,seam,0,.95,.153);
+  for(const sx of [-1,1]){const collar=glBox(g,.12,.04,.024,seam,sx*.071,1.207,.146);collar.rotation.z=sx*.23;glBox(g,.085,.012,.012,seam,sx*.115,.97,.154);}
+  for(const arm of [g.userData.руки[0],g.userData.руки[2]])glBox(arm,.116,.038,.147,dark,0,-.172,0);
+}
+function glPolish(){
+  // Reuse the existing floor textures and wall objects; no new geometry in passages.
+  for(const m of world.children){if(!m.isMesh)continue;if(m.geometry.type==='PlaneGeometry'&&m.rotation.x===-Math.PI/2&&m.position.y===0){const k=комнатаПо(m.position.x,m.position.z),tile=['kuh','van'].includes(k.id);m.material.map.image=glTex(tile?'tile':'parquet').image;m.material.map.needsUpdate=true;m.material.bumpMap=m.material.map;m.material.bumpScale=tile?.006:.012;m.material.roughness=tile?.5:.62;m.material.needsUpdate=true;}}
+  for(const m of стеныМеши){m.material.map.image=glTex('wall').image;m.material.map.needsUpdate=true;m.material.bumpMap=m.material.map;m.material.bumpScale=.009;m.material.needsUpdate=true;}
+  const woodColors=new Set([0x3a2b1e,0x3a3128,0x4a3a28,0x54371f,0x3a2a1c,0x6b4a2f,0x4a3120,0x3d2b1c,0x5a412c,0x8a6a48,0x7a5a3a,0x4f3a26,0x9a6a3a,0x7a5228,0xc79a5a,0x8a6a3a]);
+  world.traverse(o=>{if(!o.isMesh||o.userData.glDetail||!o.material?.isMeshStandardMaterial)return;const m=o.material,h=m.color.getHex();
+    if(woodColors.has(h)){m.map=glTex('wood');m.bumpMap=m.map;m.bumpScale=.008;m.roughness=.68;m.needsUpdate=true;}
+    if([0x5a4f6b,0x4c5a72,0x5b3a52].includes(h)){m.map=glTex('cloth');m.bumpMap=m.map;m.bumpScale=.005;m.roughness=.91;m.needsUpdate=true;}
+    if([0x5b6ea8,0x4fa3a5,0xe6e2d8,0xf0ece0,0xf4f2ec,0xfaf6ec].includes(h)){m.map=glTex('quilt');m.bumpMap=m.map;m.bumpScale=.006;m.needsUpdate=true;}
+    if(h===0x5a5148){m.map=glTex('stone');m.bumpMap=m.map;m.bumpScale=.008;m.roughness=.47;m.needsUpdate=true;}
+  });
+  // New trim stays on the old full-height walls. Door lintels are excluded.
+  const trim=glMat(0x7a6250,'wood');for(const wall of стеныМеши){const p=wall.geometry.parameters,bottom=wall.position.y-p.height/2;if(bottom>.05)continue;for(const sign of [-1,1])glBox(wall,p.width,.035,.022,trim,0,-wall.position.y+1.04,sign*(p.depth/2+.015));}
+  for(const rug of [ковёр,детКовёр,дорожка]){if(rug!==ковёр)rug.material.map=glTex('rug');rug.material.bumpMap=glTex('cloth');rug.material.bumpScale=.004;rug.material.needsUpdate=true;}
+  const sofa=окклюдеры.find(g=>g.isGroup&&g.position.x===-4.6&&g.position.z===-6.6),seatMat=glMat(0x8b7c97,'cloth');
+  if(sofa){for(const x of [-.6,.6])glSeam(sofa,[[x-.48,.715,-.29],[x+.48,.715,-.29],[x+.5,.715,.36],[x-.5,.715,.36]],.006,seatMat,true);for(const x of [-.78,0,.78])glSeam(sofa,[[x,.59,-.198],[x,1.1,-.198],[x+.025,1.18,-.2]],.006,seatMat);}
+  const kitchen=окклюдеры.find(g=>g.isGroup&&g.position.x===6.6&&g.position.z===-7.5),cream=glMat(0xc9baa0,'wood'),joint=glMat(0x5a5042,'wood'),metal=glMat(0xc2c8ce,'stone',.28,.75);
+  if(kitchen){for(let i=-2;i<=2;i++){glFrame(kitchen,i*1.05,.43,.309,.96,.71,cream);glFrame(kitchen,i*.98,1.95,.058,.89,.60,cream);glBox(kitchen,.15,.024,.035,metal,i*.98,1.72,.089);}for(let i=-2;i<3;i++)glBox(kitchen,.008,.82,.008,joint,i*1.05+.515,.44,.306);}
+  // Backsplash is below the existing window and above the original worktop.
+  const splash=glMat(0xa3bbb7,'tile',.58);glBox(world,5.5,.35,.012,splash,6.6,1.12,-7.872);
+  const sink=окклюдеры.find(g=>g.isGroup&&g.position.x===5.2&&g.position.z===-7.45);
+  if(sink){glBox(sink,.45,.004,.3,glMat(0x26333e,'stone',.34,.4),0,.963,0);glSeam(sink,[[0,1.08,-.2],[0,1.24,-.2],[0,1.25,-.04],[0,1.17,.03]],.026,metal);}
+  glSeam(раковина,[[0,.95,-.2],[0,1.08,-.2],[0,1.10,-.05],[0,1.01,.025]],.025,metal);
+  for(const mirror of [зеркалоКор,зеркалоВан])glFrame(mirror,0,0,.007,mirror.geometry.parameters.width+.06,mirror.geometry.parameters.height+.06,metal);
+  const bath=окклюдеры.find(g=>g.isGroup&&g.position.x===8.6&&g.position.z===3.2);if(bath){glFrame(bath,0,.30,.411,1.5,.4,glMat(0xdbe3e7,'tile',.5));glSeam(bath,[[-.5,.6,.18],[-.5,.82,.18],[-.5,.84,0],[-.5,.77,-.08]],.022,metal);}
+  for(const glass of окна){const g=glass.parent,p=glass.geometry.parameters;glBox(g,p.width+.22,.085,.25,glMat(0x8b7660,'wood'),0,-p.height/2-.10,.1);}
+  for(const cup of чашки){glDetail(cup.g,new THREE.TorusGeometry(.072,.004,5,18),metal,0,.109,0,[Math.PI/2,0,0]);}
+  const doorMat=glMat(0x7a512e,'wood');for(const y of [.47,1.13,1.84])glBox(входнаяДверь,.018,.035,.79,doorMat,.065,y,0);
+  const toyMat=glMat(0xffe8ab,'cloth');for(const child of world.children){if(child.isMesh&&child.geometry.type==='ExtrudeGeometry'&&Math.abs(child.position.y-.12)<.001&&child.position.z===2.6){glBox(child,.16,.16,.008,toyMat,0,0,.124);}}
+  // A soft optical gradient gives volume to the SAME ghost material/opacity.
+  // Position arrays and the animated tail base are left exactly as authored.
+  призрак.traverse(o=>{if(!o.isMesh||o.material!==призрМат)return;const pos=o.geometry.attributes.position,colors=new Float32Array(pos.count*3);for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i),angle=Math.atan2(z,x),shade=.68+.18*Math.cos(angle-1.1)+.055*Math.sin(angle*5+y*2);colors[i*3]=shade*.93;colors[i*3+1]=shade*.98;colors[i*3+2]=Math.min(1,shade*1.04);}o.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));});призрМат.vertexColors=true;призрМат.needsUpdate=true;
+}
+
 const СТЕНА_H = 3.0, ТОЛЩ = 0.22;
 const ДОМ = { x0:-10, z0:-8, x1:10, z1:8 };
 
@@ -934,6 +1007,7 @@ function сделатьРебёнка(опц) {
   });
   подушкаТени(g, 0.72);
   g.userData = { голова, рот, руки, ноги, глаза, брови };
+  glVisual(()=>glChild(g, опц));
   return g;
 }
 const герой = сделатьРебёнка({ одежда:0x5b7fd6, штаны:0x2c3e66, волосы:0x4a3320 });
@@ -2278,6 +2352,7 @@ $('tickleBtn').addEventListener('pointerdown', e => { e.preventDefault(); щек
 $('dashBtn').addEventListener('pointerdown', e => { e.preventDefault(); пролететь(); });
 
 /* ═══════════ главный цикл ═══════════ */
+glVisual(()=>glPolish());
 let last = performance.now(), фпс = 60;
 function loop(now) {
   requestAnimationFrame(loop);
@@ -2457,6 +2532,537 @@ window.__dbg = {
   document.getElementById('mkl-ok').onclick = function(){ location.href = ЛОББИ; };
   ask.onclick = function(e){ if (e.target === ask) ask.classList.remove('mkl-on'); };
   мигнуть();
+})();
+</script>
+
+<!-- 👥 ОНЛАЙН ПЛАНЕТЫ ИГР (заказ Марка 12.09.2026).
+     Один и тот же кусок вставляется во ВСЕ игры и в лобби. Даёт:
+     профиль (имя + аватарка), комнату по коду из 5 букв, список друзей,
+     чат готовыми фразами, голосовую связь и переход «идём играть вместе».
+     Связь идёт НАПРЯМУЮ между устройствами (WebRTC), своего сервера нет.
+     Все имена с приставкой mkn-, чтобы ничего не задеть в самой игре. -->
+<style>
+  #mkn-экран { position:fixed; inset:0; z-index:100001; display:none; overflow:auto;
+    background:radial-gradient(ellipse at 50% 20%, #1b2340f2, #05070ef8);
+    font-family:-apple-system,"Segoe UI",system-ui,sans-serif; color:#eaf0ff; padding:16px; }
+  #mkn-экран.mkn-on { display:block; }
+  .mkn-box { max-width:560px; margin:0 auto; }
+  .mkn-шапка { display:flex; align-items:center; gap:12px; background:#121a33cc; border:2px solid #ffffff1f;
+    border-radius:18px; padding:12px 14px; margin-bottom:14px; }
+  .mkn-ава { width:54px; height:54px; border-radius:16px; flex:none; background:#0a0e1c;
+    border:2px solid #ffffff26; }
+  .mkn-имя { font-weight:900; font-size:18px; }
+  .mkn-под { font-size:12.5px; opacity:.7; }
+  .mkn-х { margin-left:auto; font-size:26px; cursor:pointer; opacity:.7; padding:4px 8px; }
+  .mkn-х:hover { opacity:1; }
+  .mkn-карта { background:#121a33cc; border:2px solid #ffffff1f; border-radius:18px;
+    padding:14px; margin-bottom:12px; }
+  .mkn-карта h3 { font-size:16px; margin-bottom:8px; }
+  .mkn-кн { font:900 16px/1 inherit; padding:13px 18px; border:none; border-radius:14px; cursor:pointer;
+    background:linear-gradient(180deg,#bfe3ff,#2f7fd0); color:#05101f; box-shadow:0 5px 0 #17456f;
+    width:100%; margin-bottom:8px; }
+  .mkn-кн.mkn-зел { background:linear-gradient(180deg,#bbf7d0,#16a34a); box-shadow:0 5px 0 #0c5c2c; }
+  .mkn-кн.mkn-сер { background:#ffffff14; color:#dbe7ff; border:1.5px solid #ffffff26; box-shadow:none;
+    font-size:14px; padding:10px 14px; }
+  .mkn-кн:active { transform:translateY(3px); box-shadow:0 2px 0 #17456f; }
+  .mkn-кн:disabled { filter:grayscale(.7) brightness(.7); cursor:default; }
+  .mkn-ряд { display:flex; gap:8px; }
+  .mkn-ряд .mkn-кн { margin-bottom:0; }
+  #mkn-аваряд { display:grid; grid-template-columns:repeat(auto-fill,minmax(58px,1fr)); gap:8px; }
+  #mkn-аваряд canvas { width:100%; height:auto; border-radius:14px; cursor:pointer;
+    border:2px solid #ffffff1a; }
+  #mkn-аваряд canvas.mkn-выбр { border-color:#7dd3fc; box-shadow:0 0 14px #7dd3fc66; }
+  #mkn-поле { width:100%; font:900 26px/1 inherit; letter-spacing:8px; text-align:center; padding:12px;
+    border-radius:14px; border:2px solid #ffffff2a; background:#0a0e1c; color:#fff; text-transform:uppercase; }
+  #mkn-имяполе { width:100%; font:800 17px/1 inherit; padding:11px 12px; border-radius:12px;
+    border:2px solid #ffffff2a; background:#0a0e1c; color:#fff; }
+  .mkn-код { font:900 40px/1 inherit; letter-spacing:12px; text-align:center; color:#ffe08a;
+    text-shadow:0 0 22px #ffe08a55; padding:8px 0; }
+  .mkn-игрок { display:flex; align-items:center; gap:10px; background:#ffffff0d; border-radius:14px;
+    padding:8px 10px; margin-bottom:6px; }
+  .mkn-игрок canvas { width:36px; height:36px; border-radius:11px; }
+  .mkn-игрок .mkn-н { font-weight:800; font-size:15px; }
+  .mkn-игрок .mkn-т { margin-left:auto; font-size:11.5px; opacity:.7; }
+  #mkn-чат { max-height:170px; overflow:auto; background:#0a0e1c; border-radius:14px; padding:10px;
+    margin-bottom:8px; font-size:14px; line-height:1.5; }
+  #mkn-чат .mkn-стр { margin-bottom:4px; }
+  #mkn-чат b { color:#7dd3fc; }
+  #mkn-фразы { display:flex; flex-wrap:wrap; gap:6px; }
+  #mkn-фразы button { font:700 13px/1 inherit; padding:8px 11px; border-radius:11px; cursor:pointer;
+    border:1.5px solid #ffffff26; background:#ffffff12; color:#dbe7ff; }
+  #mkn-фразы button:active { transform:translateY(2px); }
+  .mkn-сост { font-size:13px; opacity:.8; text-align:center; margin-top:6px; min-height:18px; }
+  .mkn-беда { color:#ff9b9b; }
+  #mkn-пузырь { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:100000;
+    background:#0b1220e8; border:2px solid #7dd3fc55; border-radius:14px; padding:9px 16px;
+    font:800 14px system-ui; color:#eaf0ff; display:none; max-width:80vw; text-align:center; }
+  #mkn-мини { position:fixed; left:6px; top:calc(50% + 100px); z-index:99999; display:none;
+    background:#0b1220dd; border:2px solid #7dd3fc44; border-radius:12px; padding:5px 9px;
+    font:800 12px system-ui; color:#7dd3fc; cursor:pointer; }
+  #mkn-мини.mkn-on { display:block; }
+</style>
+<div id="mkn-пузырь"></div>
+<div id="mkn-мини"></div>
+<div id="mkn-экран"><div class="mkn-box">
+  <div class="mkn-шапка">
+    <canvas class="mkn-ава" id="mkn-мояава" width="108" height="108"></canvas>
+    <div>
+      <div class="mkn-имя" id="mkn-моёимя">Игрок</div>
+      <div class="mkn-под" id="mkn-моёсост">не в комнате</div>
+    </div>
+    <div class="mkn-х" id="mkn-закрыть">✖️</div>
+  </div>
+
+  <div class="mkn-карта" id="mkn-профиль">
+    <h3>🧑‍🚀 Кто ты</h3>
+    <input id="mkn-имяполе" maxlength="14" placeholder="Твоё имя">
+    <div style="height:8px"></div>
+    <div id="mkn-аваряд"></div>
+    <div style="height:10px"></div>
+    <button class="mkn-кн mkn-зел" id="mkn-сохранить">✅ СОХРАНИТЬ</button>
+  </div>
+
+  <div class="mkn-карта" id="mkn-начало">
+    <h3>👥 Играть вместе</h3>
+    <button class="mkn-кн mkn-зел" id="mkn-создать">🏠 СОЗДАТЬ КОМНАТУ</button>
+    <div style="height:6px"></div>
+    <input id="mkn-поле" maxlength="5" placeholder="КОД">
+    <div style="height:8px"></div>
+    <button class="mkn-кн" id="mkn-войти">🚪 ВОЙТИ ПО КОДУ</button>
+    <div class="mkn-сост" id="mkn-сост"></div>
+  </div>
+
+  <div class="mkn-карта" id="mkn-комната" style="display:none">
+    <h3>🏠 Комната</h3>
+    <div class="mkn-под" style="text-align:center">Скажи друзьям этот код</div>
+    <div class="mkn-код" id="mkn-кодтут">—</div>
+    <div id="mkn-список"></div>
+    <div class="mkn-ряд">
+      <button class="mkn-кн mkn-сер" id="mkn-голос">🎙 ПОЗВАТЬ ГОЛОСОМ</button>
+      <button class="mkn-кн mkn-сер" id="mkn-выйти">🚪 ВЫЙТИ</button>
+    </div>
+    <div class="mkn-сост" id="mkn-сост2"></div>
+  </div>
+
+  <div class="mkn-карта" id="mkn-чаткарта" style="display:none">
+    <h3>💬 Переписка</h3>
+    <div id="mkn-чат"></div>
+    <div id="mkn-фразы"></div>
+  </div>
+
+  <div class="mkn-карта" id="mkn-друзья">
+    <h3>⭐ Друзья</h3>
+    <div id="mkn-друзьяспис"></div>
+    <div class="mkn-под" id="mkn-друзьяпусто">Пока никого. Сыграй с кем-нибудь — и сможешь добавить.</div>
+  </div>
+</div></div>
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  /* ── АВАТАРКИ: тёмный фон и герой в центре (как описал Марк) ── */
+  const АВАТАРКИ = [
+    { id:'blik',    em:'👻', цв:'#7dd3fc', имя:'Блик' },
+    { id:'lampa',   em:'💡', цв:'#ffd24a', имя:'Лампочка' },
+    { id:'zhuk',    em:'🐞', цв:'#7ee787', имя:'Жучок' },
+    { id:'pylesos', em:'🧹', цв:'#c4b5fd', имя:'Пылесос' },
+    { id:'pauk',    em:'🕷', цв:'#f472b6', имя:'Паук' },
+    { id:'robot',   em:'🤖', цв:'#9fc6ff', имя:'Робот' },
+    { id:'kart',    em:'🏁', цв:'#fbbf24', имя:'Карт' },
+    { id:'planeta', em:'🪐', цв:'#a855f7', имя:'Планета' },
+    { id:'prizrak', em:'😱', цв:'#e0e7ff', имя:'Призрак' },
+    { id:'kot',     em:'🐱', цв:'#fb923c', имя:'Кот' },
+    { id:'kist',    em:'🎨', цв:'#4ade80', имя:'Кисть' },
+    { id:'cifra',   em:'🔢', цв:'#60a5fa', имя:'Цифра' },
+  ];
+  function рисоватьАву(cv, id) {
+    const а = АВАТАРКИ.find(x => x.id === id) || АВАТАРКИ[0];
+    const g = cv.getContext('2d'), S = cv.width;
+    const фон = g.createRadialGradient(S/2, S*0.4, 0, S/2, S/2, S*0.72);
+    фон.addColorStop(0, '#1d2742'); фон.addColorStop(1, '#070a14');
+    g.fillStyle = фон; g.fillRect(0, 0, S, S);
+    const сия = g.createRadialGradient(S/2, S/2, 0, S/2, S/2, S*0.46);
+    сия.addColorStop(0, а.цв + '55'); сия.addColorStop(1, а.цв + '00');
+    g.fillStyle = сия; g.fillRect(0, 0, S, S);
+    g.font = Math.round(S*0.56) + 'px system-ui, "Apple Color Emoji", "Segoe UI Emoji"';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(а.em, S/2, S*0.54);
+    return cv;
+  }
+
+  /* ── ПРОФИЛЬ. Все игры лежат на одном адресе, поэтому профиль общий ── */
+  const КЛЮЧ = 'мк-профиль', КЛЮЧД = 'мк-друзья';
+  let профиль = { имя:'', ава:'blik' }, друзья = [];
+  try { profileLoad(); } catch (_) {}
+  function profileLoad() {
+    const p = JSON.parse(localStorage.getItem(КЛЮЧ) || 'null');
+    if (p && p.имя) профиль = p;
+    друзья = JSON.parse(localStorage.getItem(КЛЮЧД) || '[]');
+  }
+  function сохранитьПрофиль() {
+    try { localStorage.setItem(КЛЮЧ, JSON.stringify(профиль));
+      localStorage.setItem(КЛЮЧД, JSON.stringify(друзья)); } catch (_) {}
+  }
+
+  /* ── КОД КОМНАТЫ: пять русских букв, которые легко сказать вслух ── */
+  const БУКВЫ = 'АБВГДЕЖЗИКЛМНОПРСТУФ';
+  const ВЛАТ = { 'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ж':'J','З':'Z','И':'I','К':'K',
+                 'Л':'L','М':'M','Н':'N','О':'O','П':'P','Р':'R','С':'S','Т':'T','У':'U','Ф':'F' };
+  const ИЗЛАТ = {}; for (const к in ВЛАТ) ИЗЛАТ[ВЛАТ[к]] = к;
+  const вЛат = код => код.split('').map(c => ВЛАТ[c] || 'A').join('');
+  const изЛат = код => код.split('').map(c => ИЗЛАТ[c] || 'А').join('');
+  function новыйКод() { let к = ''; for (let i = 0; i < 5; i++) к += БУКВЫ[Math.floor(Math.random()*БУКВЫ.length)]; return к; }
+
+  /* ── ФРАЗЫ ДЛЯ ЧАТА. Писать руками не нужно — только жать кнопки ── */
+  const ФРАЗЫ = [
+    '👋 Привет!', '🎮 В какую игру поиграем?', '🕷 Давай в Паучий лабиринт',
+    '🏁 Давай в Гонки пылесосов', '👻 Давай в Жизнь призрака', '🌙 Давай в Ночную смену',
+    '🍽 Давай в Обжору', '🧹 Давай в Битву пылесосов', '▶️ Давайте уже начинать играть',
+    '⏳ Подожди чуть-чуть', '😂 Ха-ха!', '😱 Ой, страшно!', '👍 Хорошо', '👎 Не хочу',
+    '🏆 Я выиграл!', '😅 Ты меня обогнал', '🔁 Давай ещё раз', '🎙 Включи микрофон',
+    '👀 Я тебя вижу', '🆘 Помоги!', '💤 Я устал, пока!',
+  ];
+
+  /* ── СОСТОЯНИЕ СЕТИ ── */
+  let peer = null, хозяин = false, код = '', связи = [], хозСвязь = null;
+  let игроки = [];            // [{ид, имя, ава, хозяин}]
+  let мойИд = '', голосВкл = false, мойПоток = null, звонки = [];
+  const слушатели = { данные:[], игроки:[], старт:[], чат:[] };
+
+  const ИГРА = (location.pathname.match(/mark-([a-z0-9]+)/) || [,'arcade'])[1];
+  const ЛОББИ = 'https://maksimdodychin.github.io/mark-arcade/';
+
+  function пузырь(текст, сек) {
+    const d = $('mkn-пузырь'); d.textContent = текст; d.style.display = 'block';
+    clearTimeout(d._t); d._t = setTimeout(() => d.style.display = 'none', (сек || 3.5) * 1000);
+  }
+  function состояние(текст, беда) {
+    ['mkn-сост', 'mkn-сост2'].forEach(id => { const e = $(id); if (!e) return;
+      e.textContent = текст; e.className = 'mkn-сост' + (беда ? ' mkn-беда' : ''); });
+  }
+
+  /* ── подгружаем движок связи только когда он реально нужен ── */
+  function загрузитьPeer() {
+    if (window.Peer) return Promise.resolve();
+    const адреса = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
+                    'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'];
+    return new Promise((res, rej) => {
+      let i = 0;
+      const тянуть = () => {
+        if (i >= адреса.length) { rej(new Error('нет связи')); return; }
+        const s = document.createElement('script');
+        s.src = адреса[i++]; s.onload = () => res(); s.onerror = тянуть;
+        document.head.appendChild(s);
+      };
+      тянуть();
+    });
+  }
+
+  const идКомнаты = к => 'mkroom-' + вЛат(к);
+
+  async function создатьКомнату(готовыйКод) {
+    if (!профиль.имя) { пузырь('Сначала впиши имя и выбери аватарку'); открыть(); return; }
+    состояние('Открываю комнату…');
+    try { await загрузитьPeer(); }
+    catch (_) { состояние('Нет интернета. Онлайн работает только со связью.', true); return; }
+    код = готовыйКод || новыйКод();
+    хозяин = true;
+    if (peer) { try { peer.destroy(); } catch (_) {} }
+    peer = new Peer(идКомнаты(код), { debug:0 });
+    peer.on('open', ид => {
+      мойИд = ид; игроки = [{ ид, имя:профиль.имя, ава:профиль.ава, хозяин:true }];
+      показатьКомнату(); состояние('Комната открыта. Диктуй код!');
+      обновитьМини();
+    });
+    peer.on('connection', c => {
+      связи.push(c);
+      c.on('open', () => {
+        c.send({ т:'привет', игроки, хозяин:{ имя:профиль.имя, ава:профиль.ава } });
+      });
+      c.on('data', d => приняли(d, c));
+      c.on('close', () => { связи = связи.filter(x => x !== c);
+        игроки = игроки.filter(g => g.ид !== c.peer); разослать({ т:'люди', игроки });
+        рисоватьИгроков(); });
+    });
+    peer.on('error', e => {
+      if (String(e).includes('is taken')) { состояние('Такая комната уже есть — беру другой код', true);
+        setTimeout(() => создатьКомнату(), 400); return; }
+      состояние('Не получилось: ' + e.type, true);
+    });
+  }
+
+  async function войтиВКомнату(введён) {
+    if (!профиль.имя) { пузырь('Сначала впиши имя и выбери аватарку'); открыть(); return; }
+    const к = (введён || $('mkn-поле').value || '').toUpperCase().replace(/[^А-ЯЁ]/g, '').slice(0, 5);
+    if (к.length !== 5) { состояние('Код — ровно пять русских букв', true); return; }
+    состояние('Ищу комнату…');
+    try { await загрузитьPeer(); }
+    catch (_) { состояние('Нет интернета. Онлайн работает только со связью.', true); return; }
+    код = к; хозяин = false;
+    if (peer) { try { peer.destroy(); } catch (_) {} }
+    peer = new Peer({ debug:0 });
+    peer.on('open', ид => {
+      мойИд = ид;
+      хозСвязь = peer.connect(идКомнаты(к), { reliable:true });
+      хозСвязь.on('open', () => {
+        хозСвязь.send({ т:'явился', имя:профиль.имя, ава:профиль.ава });
+        показатьКомнату(); состояние('Вошёл в комнату ' + к);
+        обновитьМини();
+      });
+      хозСвязь.on('data', d => приняли(d, хозСвязь));
+      хозСвязь.on('error', () => состояние('Комната не отвечает', true));
+      хозСвязь.on('close', () => { состояние('Хозяин закрыл комнату', true); выйти(); });
+      setTimeout(() => { if (!хозСвязь || !хозСвязь.open) состояние('Такой комнаты нет. Проверь код.', true); }, 6000);
+    });
+    peer.on('call', зв => { зв.answer(мойПоток || undefined); принятьЗвонок(зв); });
+    peer.on('error', e => состояние('Не получилось: ' + e.type, true));
+  }
+
+  function разослать(о, кроме) {
+    if (хозяин) связи.forEach(c => { if (c !== кроме && c.open) { try { c.send(о); } catch (_) {} } });
+    else if (хозСвязь && хозСвязь.open) { try { хозСвязь.send(о); } catch (_) {} }
+  }
+
+  function приняли(d, откуда) {
+    if (!d || !d.т) return;
+    if (d.т === 'явился') {                       // к хозяину пришёл новый игрок
+      игроки.push({ ид:откуда.peer, имя:d.имя, ава:d.ава, хозяин:false });
+      разослать({ т:'люди', игроки });
+      рисоватьИгроков();
+      чатСтрока('система', d.имя + ' зашёл в комнату');
+      разослать({ т:'чат', имя:'', текст:d.имя + ' зашёл в комнату', сист:true });
+      запомнитьДруга({ имя:d.имя, ава:d.ава });
+      return;
+    }
+    if (d.т === 'привет') { игроки = d.игроки.concat([{ ид:мойИд, имя:профиль.имя, ава:профиль.ава }]);
+      рисоватьИгроков(); if (d.хозяин) запомнитьДруга(d.хозяин); return; }
+    if (d.т === 'люди') { игроки = d.игроки; рисоватьИгроков(); return; }
+    if (d.т === 'чат') { чатСтрока(d.сист ? 'система' : d.имя, d.текст);
+      if (хозяин) разослать(d, откуда);
+      слушатели.чат.forEach(f => f(d)); return; }
+    if (d.т === 'идём') { перейтиВИгру(d.url, false); return; }
+    if (d.т === 'старт') { слушатели.старт.forEach(f => f(d)); return; }
+    if (d.т === 'игра') {
+      if (хозяин) разослать(d, откуда);           // хозяин пересылает остальным
+      слушатели.данные.forEach(f => f(d.д, d.от));
+      return;
+    }
+  }
+
+  /* ── ЧАТ ── */
+  function чатСтрока(кто, текст) {
+    const c = $('mkn-чат'); if (!c) return;
+    const d = document.createElement('div'); d.className = 'mkn-стр';
+    d.innerHTML = кто === 'система' ? '<i style="opacity:.7">' + текст + '</i>'
+      : '<b>' + кто + ':</b> ' + текст;
+    c.appendChild(d); c.scrollTop = c.scrollHeight;
+    while (c.children.length > 60) c.removeChild(c.firstChild);
+  }
+  function сказать(текст) {
+    if (!peer) { пузырь('Сначала войди в комнату'); return; }
+    чатСтрока(профиль.имя, текст);
+    разослать({ т:'чат', имя:профиль.имя, текст });
+    пузырь('💬 ' + профиль.имя + ': ' + текст, 2.5);
+  }
+
+  /* ── ГОЛОС ── */
+  async function голос() {
+    if (!peer) { пузырь('Сначала войди в комнату'); return; }
+    if (голосВкл) { выключитьГолос(); return; }
+    try { мойПоток = await navigator.mediaDevices.getUserMedia({ audio:true, video:false }); }
+    catch (_) { состояние('Микрофон не разрешён. Разреши доступ в браузере.', true); return; }
+    голосВкл = true; $('mkn-голос').textContent = '🔇 ВЫКЛЮЧИТЬ МИКРОФОН';
+    состояние('🎙 Микрофон включён — тебя слышно');
+    игроки.forEach(г => { if (г.ид && г.ид !== мойИд) принятьЗвонок(peer.call(г.ид, мойПоток)); });
+    if (!хозяин && хозСвязь) принятьЗвонок(peer.call(идКомнаты(код), мойПоток));
+  }
+  function принятьЗвонок(зв) {
+    if (!зв) return; звонки.push(зв);
+    зв.on('stream', поток => {
+      let a = document.getElementById('mkn-зв-' + зв.peer);
+      if (!a) { a = document.createElement('audio'); a.id = 'mkn-зв-' + зв.peer;
+        a.autoplay = true; a.style.display = 'none'; document.body.appendChild(a); }
+      a.srcObject = поток; a.play().catch(() => {});
+    });
+    зв.on('close', () => { const a = document.getElementById('mkn-зв-' + зв.peer); if (a) a.remove(); });
+  }
+  function выключитьГолос() {
+    голосВкл = false; $('mkn-голос').textContent = '🎙 ПОЗВАТЬ ГОЛОСОМ';
+    звонки.forEach(з => { try { з.close(); } catch (_) {} }); звонки = [];
+    if (мойПоток) { мойПоток.getTracks().forEach(t => t.stop()); мойПоток = null; }
+    состояние('Микрофон выключен');
+  }
+
+  /* ── ПЕРЕХОД «ИДЁМ ИГРАТЬ ВМЕСТЕ» ──
+     Связь не переживает переход на другую страницу, поэтому договариваемся
+     кодом: все уходят по адресу с ?мк=КОД и там автоматически снова находятся. */
+  function позватьВИгру(url) {
+    if (!peer) { пузырь('Сначала создай комнату'); return; }
+    if (!хозяин) { пузырь('Позвать в игру может только хозяин комнаты'); return; }
+    разослать({ т:'идём', url });
+    setTimeout(() => перейтиВИгру(url, true), 600);
+  }
+  function перейтиВИгру(url, яХозяин) {
+    const р = url + (url.includes('?') ? '&' : '?') + 'мк=' + encodeURIComponent(код) +
+      (яХозяин ? '&хоз=1' : '');
+    location.href = р;
+  }
+
+  /* ── ДРУЗЬЯ ── */
+  function запомнитьДруга(д) {
+    if (!д || !д.имя || д.имя === профиль.имя) return;
+    if (друзья.some(f => f.имя === д.имя)) return;
+    друзья.push({ имя:д.имя, ава:д.ава || 'blik' });
+    сохранитьПрофиль(); рисоватьДрузей();
+  }
+  function рисоватьДрузей() {
+    const с = $('mkn-друзьяспис'); с.innerHTML = '';
+    $('mkn-друзьяпусто').style.display = друзья.length ? 'none' : 'block';
+    друзья.forEach((д, i) => {
+      const r = document.createElement('div'); r.className = 'mkn-игрок';
+      const cv = document.createElement('canvas'); cv.width = cv.height = 72; рисоватьАву(cv, д.ава);
+      r.appendChild(cv);
+      const n = document.createElement('div'); n.className = 'mkn-н'; n.textContent = д.имя; r.appendChild(n);
+      const x = document.createElement('div'); x.className = 'mkn-т'; x.textContent = '✖️';
+      x.style.cursor = 'pointer';
+      x.onclick = () => { друзья.splice(i, 1); сохранитьПрофиль(); рисоватьДрузей(); };
+      r.appendChild(x);
+      с.appendChild(r);
+    });
+  }
+
+  /* ── ЭКРАНЫ ── */
+  function рисоватьИгроков() {
+    const с = $('mkn-список'); if (!с) return;
+    с.innerHTML = '';
+    игроки.forEach(г => {
+      const r = document.createElement('div'); r.className = 'mkn-игрок';
+      const cv = document.createElement('canvas'); cv.width = cv.height = 72; рисоватьАву(cv, г.ава);
+      r.appendChild(cv);
+      const n = document.createElement('div'); n.className = 'mkn-н'; n.textContent = г.имя; r.appendChild(n);
+      const t = document.createElement('div'); t.className = 'mkn-т';
+      t.textContent = г.хозяин ? 'хозяин' : (г.ид === мойИд ? 'это ты' : 'друг');
+      r.appendChild(t);
+      с.appendChild(r);
+    });
+    $('mkn-моёсост').textContent = код ? ('в комнате ' + код + ' · игроков ' + игроки.length) : 'не в комнате';
+    обновитьМини();
+    слушатели.игроки.forEach(f => f(игроки));
+  }
+  function показатьКомнату() {
+    $('mkn-начало').style.display = 'none';
+    $('mkn-комната').style.display = 'block';
+    $('mkn-чаткарта').style.display = 'block';
+    $('mkn-кодтут').textContent = код;
+    рисоватьИгроков();
+  }
+  function выйти() {
+    try { if (peer) peer.destroy(); } catch (_) {}
+    peer = null; связи = []; хозСвязь = null; игроки = []; код = ''; хозяин = false;
+    выключитьГолос();
+    $('mkn-начало').style.display = 'block';
+    $('mkn-комната').style.display = 'none';
+    $('mkn-чаткарта').style.display = 'none';
+    $('mkn-моёсост').textContent = 'не в комнате';
+    обновитьМини();
+  }
+  function обновитьМини() {
+    const m = $('mkn-мини');
+    if (код && peer) { m.textContent = '👥 ' + код + ' · ' + игроки.length; m.classList.add('mkn-on'); }
+    else m.classList.remove('mkn-on');
+  }
+  function открыть() {
+    $('mkn-экран').classList.add('mkn-on');
+    $('mkn-имяполе').value = профиль.имя || '';
+    рисоватьАву($('mkn-мояава'), профиль.ава);
+    $('mkn-моёимя').textContent = профиль.имя || 'Игрок';
+    рисоватьРядАватарок(); рисоватьДрузей();
+  }
+  function рисоватьРядАватарок() {
+    const р = $('mkn-аваряд'); р.innerHTML = '';
+    АВАТАРКИ.forEach(а => {
+      const cv = document.createElement('canvas'); cv.width = cv.height = 108;
+      рисоватьАву(cv, а.id); cv.title = а.имя;
+      if (а.id === профиль.ава) cv.className = 'mkn-выбр';
+      cv.onclick = () => { профиль.ава = а.id; рисоватьРядАватарок();
+        рисоватьАву($('mkn-мояава'), профиль.ава); };
+      р.appendChild(cv);
+    });
+  }
+
+  /* ── КНОПКИ ── */
+  $('mkn-закрыть').onclick = () => $('mkn-экран').classList.remove('mkn-on');
+  $('mkn-мини').onclick = открыть;
+  $('mkn-сохранить').onclick = () => {
+    const и = ($('mkn-имяполе').value || '').trim().slice(0, 14);
+    if (!и) { пузырь('Впиши имя'); return; }
+    профиль.имя = и; сохранитьПрофиль();
+    $('mkn-моёимя').textContent = и; рисоватьАву($('mkn-мояава'), профиль.ава);
+    пузырь('✅ Сохранил: ' + и);
+  };
+  $('mkn-создать').onclick = () => создатьКомнату();
+  $('mkn-войти').onclick = () => войтиВКомнату();
+  $('mkn-выйти').onclick = выйти;
+  $('mkn-голос').onclick = голос;
+  $('mkn-поле').addEventListener('input', e => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^А-ЯЁ]/g, '').slice(0, 5);
+  });
+  (function фразы() {
+    const р = $('mkn-фразы');
+    ФРАЗЫ.forEach(ф => { const b = document.createElement('button');
+      b.textContent = ф; b.onclick = () => сказать(ф); р.appendChild(b); });
+  })();
+
+  /* ── кнопка 👥 в общей панели ── */
+  (function кнопка() {
+    const бар = document.getElementById('mkl-bar');
+    const b = document.createElement('div');
+    b.className = 'mkl-b'; b.id = 'mkn-кн-онлайн'; b.title = 'Играть с друзьями';
+    b.textContent = '👥';
+    b.style.background = 'radial-gradient(circle at 35% 30%,#7dd3fc,#0369a1)';
+    if (бар) бар.insertBefore(b, бар.children[1] || null);
+    else {
+      b.style.cssText += ';position:fixed;left:6px;top:50%;transform:translateY(-50%);z-index:99999;' +
+        'width:42px;height:42px;border-radius:50%;border:2px solid #ffffff44;cursor:pointer;color:#fff;' +
+        'font:800 17px/1 system-ui;display:flex;align-items:center;justify-content:center';
+      document.body.appendChild(b);
+    }
+    b.onclick = открыть;
+  })();
+
+  /* ── автоподключение после перехода «идём играть вместе» ── */
+  (function авто() {
+    const п = new URLSearchParams(location.search);
+    const к = (п.get('мк') || '').toUpperCase();
+    if (!к || к.length !== 5) return;
+    setTimeout(() => {
+      if (п.get('хоз') === '1') создатьКомнату(к); else войтиВКомнату(к);
+      пузырь('👥 Возвращаюсь в комнату ' + к, 4);
+    }, 900);
+  })();
+
+  /* ── ОБЩИЙ ДОСТУП ДЛЯ ИГР ── */
+  window.МКСеть = {
+    get вкл() { return !!peer && !!код; },
+    get хозяин() { return хозяин; },
+    get код() { return код; },
+    get игроки() { return игроки.slice(); },
+    get профиль() { return Object.assign({}, профиль); },
+    get голос() { return голосВкл; },
+    послать(д) { разослать({ т:'игра', д, от:мойИд }); },
+    старт(д) { разослать({ т:'старт', д }); слушатели.старт.forEach(f => f(д)); },
+    наДанные(f) { слушатели.данные.push(f); },
+    наИгроков(f) { слушатели.игроки.push(f); },
+    наСтарт(f) { слушатели.старт.push(f); },
+    наЧат(f) { слушатели.чат.push(f); },
+    сказать, открыть, выйти,
+    позватьВИгру,
+    создать: создатьКомнату,
+    войти: войтиВКомнату,
+    аватарка: рисоватьАву,
+    АВАТАРКИ, ФРАЗЫ,
+  };
 })();
 </script>
 
