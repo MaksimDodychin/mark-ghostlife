@@ -84,6 +84,7 @@
   #lightBtn  { background:radial-gradient(circle at 35% 30%,#fef3c7,#a16207); }
   #rustleBtn { background:radial-gradient(circle at 35% 30%,#d9f99d,#3f6212); }
   #tickleBtn { background:radial-gradient(circle at 35% 30%,#fbcfe8,#9d174d); }
+  #eyesBtn   { background:radial-gradient(circle at 35% 30%,#bbf7d0,#15803d); }
   #dashBtn   { background:radial-gradient(circle at 35% 30%,#bfdbfe,#1e40af); }
 
   /* ── экраны ── */
@@ -146,7 +147,7 @@
   <link rel="apple-touch-icon-precomposed" sizes="180x180" href="apple-touch-icon.png">
   <meta name="msapplication-TileImage" content="icon-192.png">
   <meta name="msapplication-TileColor" content="#7c3aed">
-  <script>window.__APP_VER = "5a6bfa34e7";</script>
+  <script>window.__APP_VER = "c8938ff83c";</script>
 </head>
 <body>
 <div id="err"></div>
@@ -175,6 +176,7 @@
   <div class="abtn g2" id="rustleBtn">🫧<small>ШОРОХ</small></div>
   <div class="abtn g2" id="tickleBtn">🤏<small>ЩЕКОТКА</small></div>
   <div class="abtn g2" id="dashBtn">🌪<small>ПРОЛЁТ</small></div>
+  <div class="abtn g2" id="eyesBtn">👀<small>ГЛАЗА</small></div>
   <div class="abtn g2" id="showBtn">👻<small>ЯВИТЬСЯ</small></div>
   <div class="abtn g2 wide" id="knockBtn">👊<small>СТУК</small></div>
 </div>
@@ -620,7 +622,7 @@ function лампа(x, z, цвет, сила, дальн, y) {
   const об = { свет:л, плафон, лампочка, блик, сила, вкл:true, x, z };
   лампы.push(об); return об;
 }
-лампа(-4.5, -4.5, 0xffd9a0, 14, 15);    // гостиная — комната большая, света надо больше
+лампа(-2.4, -4.5, 0xffd9a0, 14, 15);    // гостиная — комната большая, света надо больше
 лампа(-8.2, -6.4, 0xffd9a0, 7,  10);    // и второй огонёк в дальнем углу гостиной
 лампа(6,    -4.5, 0xfff0d0, 8,  11);    // кухня
 лампа(0,     0.3, 0xffe0b0, 7,  12, 2.7); // коридор
@@ -659,7 +661,7 @@ function диван(цвет) {
     const н = цил(0.05, 0.04, 0.16, 0x3a2a1c); н.position.set(x, 0.08, z); g.add(н); }));
   return g;
 }
-поставить(диван(0x5a4f6b), -4.6, 0, -6.6, 0, 1.3, 0.6);
+поставить(диван(0x5a4f6b), -2.4, 0, -6.6, 0, 1.3, 0.6);   // едет следом за телевизором
 function кресло(цвет) {
   const g = new THREE.Group();
   const низ = короб(0.95, 0.4, 0.9, цвет, { r:0.16 }); низ.position.y = 0.36; g.add(низ);
@@ -678,25 +680,25 @@ function столик() {
     const н = цил(0.05, 0.045, 0.52, 0x4a3120); н.position.set(x, 0.26, z); g.add(н); }));
   return g;
 }
-const журнСтолик = поставить(столик(), -4.6, 0, -4.5, 0, 0.68, 0.4);
+const журнСтолик = поставить(столик(), -2.4, 0, -4.5, 0, 0.68, 0.4);
 /* ваза на столике — её призрак может уронить */
 const ваза = new THREE.Mesh(new THREE.LatheGeometry(
   [[0.0,0],[0.12,0],[0.16,0.08],[0.13,0.22],[0.09,0.3],[0.11,0.36],[0.10,0.38],[0,0.38]]
     .map(p => new THREE.Vector2(p[0], p[1])), 18),
   мат(0x9ecfd6, { roughness:0.35, metalness:0.2 }));
-ваза.castShadow = true; ваза.position.set(-4.6, 0.565, -4.5); world.add(ваза);
+ваза.castShadow = true; ваза.position.set(-2.4, 0.565, -4.5); world.add(ваза);
 
 const ковёр = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.6),
   new THREE.MeshStandardMaterial({ map:texКовёр, roughness:1 }));
-ковёр.rotation.x = -Math.PI/2; ковёр.position.set(-4.6, 0.012, -4.4);
+ковёр.rotation.x = -Math.PI/2; ковёр.position.set(-2.4, 0.012, -4.4);
 ковёр.receiveShadow = true; world.add(ковёр);
 
 /* телевизор — сам включается на помехах */
 const тумбаТВ = поставить((() => { const g = new THREE.Group();
   const т = короб(2.0, 0.5, 0.45, 0x3d2b1c, { r:0.06 }); т.position.y = 0.28; g.add(т);
   const ящ = короб(1.7, 0.2, 0.06, 0x5a412c, { r:0.03 }); ящ.position.set(0, 0.3, 0.24); g.add(ящ);
-  return g; })(), -4.6, 0, -1.75, Math.PI, 1.05, 0.3);
-const тв = new THREE.Group(); тв.position.set(-4.6, 1.15, -1.8);
+  return g; })(), -2.4, 0, -1.75, Math.PI, 1.05, 0.3);   // ⚠️ было -4.6 — загораживало дверь
+const тв = new THREE.Group(); тв.position.set(-2.4, 1.15, -1.8);
 тв.rotation.y = Math.PI;            // экраном к дивану, а не в стену
 world.add(тв);
 const корпусТВ = короб(1.7, 1.0, 0.12, 0x14161c, { r:0.05 }); тв.add(корпусТВ);
@@ -1492,7 +1494,7 @@ const ИСПУГИ = [
   { id:'tv', имя:'ТЕЛЕВИЗОР', текст:'📺 Телевизор включился сам. По всем каналам одни помехи.',
     задача:'Выключи телевизор в гостиной',
     старт() { твВкл = true; светТВ.intensity = 3; Snd.шум(0.9, 0.1, 3000, 'highpass');
-      цельДействия = { x:-4.6, z:-3.0, r:1.8, подпись:'✋ Выключить телевизор',
+      цельДействия = { x:-2.4, z:-2.9, r:1.8, подпись:'✋ Выключить телевизор',
         сделать() { твВкл = false; светТВ.intensity = 0; рисоватьТВ(false, 0); Snd.щелчок();
           say('Экран погас. В отражении — только ты.', 2.8); } }; } },
   { id:'dver', имя:'СТУК В ДВЕРЬ', текст:'🚪 Кто-то трижды постучал во входную дверь. В три часа ночи.',
@@ -1723,7 +1725,7 @@ const НОЧИ = [
 let ночь = 0, дети = [], эктоплазма = 100, явленТ = 0, явилсяХотьРаз = false;
 let кругСвет = null, кругФонарь = null, кот = null, взрослый = null;
 let страшилка = null, стрСтрока = 0, стрТаймер = 0, пикТаймер = 0, ктоРассказ = null;
-const ЦЕНА = { стук:10, шорох:8, щекотка:12, пролёт:14, холод:16, свет:22, явиться:32 };
+const ЦЕНА = { стук:10, шорох:8, щекотка:12, пролёт:14, холод:16, свет:22, явиться:32, глаза:28 };
 const ВРЕМЯ_НОЧИ = [150, 170, 190];     // на каждую ночь свой срок (заказ Марка)
 let таймерНочи = 0, пролётТ = 0, пролётНапр = { x:0, z:1 }, задетые = null;
 let жетонНочи = 0, ночьЗакрыта = false;   // ⚠️ защита от двойного перехода на следующую ночь
@@ -1988,6 +1990,81 @@ function явиться() {
   дети.forEach(d => { if (видитМеня(d)) { напугать(d, 46); смотретьНа(d, player.x, player.z, 3); кого++; } });
   if (!кого) say('👻 Тебя никто не увидел. Вставай прямо у них перед глазами.', 2.4);
 }
+/* 👀 ВЫЗВАТЬ ЗЕЛЁНЫЕ ГЛАЗА (заказ Марка 19.09.2026).
+   Те самые, от которых ты сам убегал в режиме «я дома один». Теперь ты — призрак,
+   и можешь напустить их на детей. Они ползут к ближайшему и пугают, пока ползут.
+   Но ребёнок, посветивший на них фонариком, прогонит их так же, как когда-то ты. */
+function лучРебёнкаНа(d, x, z) {
+  if (d.убежал || !d.фонарик) return false;
+  const dx = x - d.x, dz = z - d.z, dist = Math.hypot(dx, dz);
+  if (dist > 9) return false;
+  let раз = Math.atan2(dx, dz) - d.взгляд;
+  while (раз > Math.PI) раз -= Math.PI*2; while (раз < -Math.PI) раз += Math.PI*2;
+  return Math.abs(раз) < 0.4;
+}
+function ближайшийРебёнок(x, z) {
+  let кого = null, лучш = 1e9;
+  дети.forEach(d => { if (d.убежал) return;
+    const q = Math.hypot(d.x - x, d.z - z); if (q < лучш) { лучш = q; кого = d; } });
+  return кого;
+}
+function вызватьГлаза() {
+  if (state !== 'play' || режим !== 'prizrak') return;
+  if (глазаСост.жив) { say('👀 Они уже здесь. Смотри, как ползут.', 1.8); return; }
+  const цель = ближайшийРебёнок(player.x, player.z);
+  if (!цель) { say('👀 Пугать некого — все уже разбежались.', 2); return; }
+  if (!тратить(ЦЕНА.глаза)) return;
+  // появляются В ТЕМНОМ УГЛУ за спиной у ребёнка, метрах в шести
+  const a = Math.atan2(цель.x - player.x, цель.z - player.z);
+  const x = clamp(цель.x + Math.sin(a)*5.5, ДОМ.x0 + 1, ДОМ.x1 - 1);
+  const z = clamp(цель.z + Math.cos(a)*5.5, ДОМ.z0 + 1, ДОМ.z1 - 1);
+  глазаСост.жив = true; глазаСост.x = x; глазаСост.z = z; глазаСост.свечу = 0;
+  глазаСост.призрачные = true; глазаСост.жизнь = 16;
+  глазаГр.visible = true; глазаГр.position.set(x, 0, z);
+  глазМат.color.setHex(0x39ff8a); тушка.material.opacity = 0.92;
+  Snd.шёпот(); вспышка(0.18, '#39ff8a');
+  say('👀 В тёмном углу зажглись два зелёных глаза. Они поползли к ' + цель.имя + '.', 3.6);
+}
+/* ползут к ребёнку и пугают, пока их не осветят фонариком */
+function обновитьГлазаПризрака(dt) {
+  if (!глазаСост.жив || !глазаСост.призрачные) return;
+  глазаСост.жизнь -= dt;
+  const цель = ближайшийРебёнок(глазаСост.x, глазаСост.z);
+  let жгут = false;
+  дети.forEach(d => { if (лучРебёнкаНа(d, глазаСост.x, глазаСост.z)) жгут = true; });
+  if (жгут) {                                   // 🔦 ребёнок посветил — пятятся и тают
+    глазаСост.свечу += dt;
+    глазМат.color.setHex(0xffe066);
+    тушка.material.opacity = 0.92 - глазаСост.свечу*0.5;
+    if (цель) { const dx = цель.x - глазаСост.x, dz = цель.z - глазаСост.z;
+      const d = Math.max(0.001, Math.hypot(dx, dz));
+      глазаСост.x -= dx/d*dt*1.5; глазаСост.z -= dz/d*dt*1.5; }
+  } else {
+    глазаСост.свечу = Math.max(0, глазаСост.свечу - dt*0.7);
+    глазМат.color.setHex(0x39ff8a); тушка.material.opacity = 0.92;
+    if (цель) {
+      const dx = цель.x - глазаСост.x, dz = цель.z - глазаСост.z;
+      const d = Math.max(0.001, Math.hypot(dx, dz));
+      if (d > 0.8) { глазаСост.x += dx/d*dt*1.15; глазаСост.z += dz/d*dt*1.15; }
+      if (d < 4.2) {                            // близко — жутко
+        напугать(цель, 15*dt);
+        смотретьНа(цель, глазаСост.x, глазаСост.z, 1.6);
+        цель.дрожь = Math.max(цель.дрожь, 1);
+        if (Math.random() < dt*0.6) Snd.шёпот();
+      }
+    }
+  }
+  глазаГр.position.set(глазаСост.x, 0, глазаСост.z);
+  if (глазаСост.свечу >= 1.5 || глазаСост.жизнь <= 0) {
+    const прогнали = глазаСост.свечу >= 1.5;
+    глазаСост.жив = false; глазаСост.призрачные = false;
+    глазаГр.visible = false; тушка.material.opacity = 0.92; глазМат.color.setHex(0x39ff8a);
+    if (прогнали) { Snd.визг();
+      say('🔦 Их прогнали фонариком. Точно так же, как когда-то ты сам.', 3.2); }
+    else say('👀 Глаза растаяли в темноте. Можно вызвать снова.', 2.4);
+  }
+}
+
 /* 🫧 ПОШУРШАТЬ. Тише стука и безопаснее: дети смотрят на ПРЕДМЕТ, а не на тебя. */
 function шорох() {
   if (state !== 'play' || режим !== 'prizrak') return;
@@ -2222,6 +2299,7 @@ function обновитьПризрака(dt) {
       if (эктоплазма <= 0) { эктоплазма = 0; развеять(); } }
     else эктоплазма = Math.min(100, эктоплазма + 3*dt);
   } else эктоплазма = Math.min(100, эктоплазма + 7.5*dt);
+  обновитьГлазаПризрака(dt);          // 👀 вызванные глаза живут своей жизнью
   const видно = явленТ > 0;
   призрМат.opacity = видно ? 0.85 : (пролётТ > 0 ? 0.5 : 0.28);
   ореол.material.opacity = (видно ? 0.5 : 0.24) + Math.sin(время*2.2)*0.05;
@@ -2277,6 +2355,7 @@ function обновитьHud() {
       : (пикТаймер > 0 ? '🔥 КУЛЬМИНАЦИЯ! Пугай СЕЙЧАС — страх ×3'
       : 'Разгони всех: осталось ' + дети.filter(d => !d.убежал).length);
     $('showBtn').classList.toggle('cool', эктоплазма < ЦЕНА.явиться);
+    $('eyesBtn').classList.toggle('cool', эктоплазма < ЦЕНА.глаза || глазаСост.жив);
     $('coldBtn').classList.toggle('cool', эктоплазма < ЦЕНА.холод);
     $('lightBtn').classList.toggle('cool', эктоплазма < ЦЕНА.свет || темнотаТ > 0);
     $('knockBtn').classList.toggle('cool', эктоплазма < ЦЕНА.стук);
@@ -2357,6 +2436,7 @@ $('useBtn').addEventListener('pointerdown', e => { e.preventDefault(); дейс�
 $('torchBtn').addEventListener('pointerdown', e => { e.preventDefault(); фонарьТумблер(); });
 $('knockBtn').addEventListener('pointerdown', e => { e.preventDefault(); стук(); });
 $('showBtn').addEventListener('pointerdown', e => { e.preventDefault(); явиться(); });
+$('eyesBtn').addEventListener('pointerdown', e => { e.preventDefault(); вызватьГлаза(); });
 $('coldBtn').addEventListener('pointerdown', e => { e.preventDefault(); холод(); });
 $('lightBtn').addEventListener('pointerdown', e => { e.preventDefault(); гаситьСвет(); });
 $('rustleBtn').addEventListener('pointerdown', e => { e.preventDefault(); шорох(); });
